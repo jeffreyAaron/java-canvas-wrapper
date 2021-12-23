@@ -13,7 +13,7 @@ public class Renderer implements Runnable {
     private final Display display;
     private volatile BufferStrategy bs;
     private volatile int width, height;
-    private volatile BufferedImage buffer;
+    private volatile RenderFrame renderFrame;
     private final Thread renderThread;
 
     private volatile boolean isRunning = false;
@@ -29,18 +29,14 @@ public class Renderer implements Runnable {
         this.bs = display.getCanvas().getBufferStrategy();
         this.width = display.getCanvas().getWidth();
         this.height = display.getCanvas().getHeight();
-        this.buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    }
-
-    public Graphics2D getGraphics() {
-        return buffer.createGraphics();
     }
 
     private void setUpBufferStrategy() {
         display.getCanvas().createBufferStrategy(2);
     }
 
-    public void startRendering() {
+    public void startRendering(RenderFrame renderFrame) {
+        this.renderFrame = renderFrame;
         renderThread.start();
     }
 
@@ -60,7 +56,7 @@ public class Renderer implements Runnable {
 
                     g = bs.getDrawGraphics();
                     g.clearRect(0, 0, getWidth(), getHeight());
-                    g.drawImage(buffer, 0, 0, null);
+                    renderFrame.renderFrame((Graphics2D) g);
                 } finally {
                     if (g != null) {
                         g.dispose();
